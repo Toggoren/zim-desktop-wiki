@@ -43,7 +43,7 @@ from zim.signals import callback
 from zim.formats import get_dumper, heading_to_anchor, get_format, increase_list_iter, \
 	ParseTree, ElementTreeModule, BackwardParseTreeBuilderWithCleanup, \
 	BULLET, CHECKED_BOX, UNCHECKED_BOX, XCHECKED_BOX, TRANSMIGRATED_BOX, MIGRATED_BOX, LINE, OBJECT, \
-	HEADING, LISTITEM, BLOCK_LEVEL, FORMATTEDTEXT
+	HEADING, LISTITEM, BLOCK_LEVEL, FORMATTEDTEXT, ALPHABET, POSSIBLE_LETTERS, str2int, int2str
 from zim.formats.wiki import url_re, match_url
 from zim.formats.wiki import Dumper as WikiDumper
 from zim.actions import get_gtk_actiongroup, action, toggle_action, get_actions, \
@@ -131,7 +131,7 @@ BULLETS = (BULLET, UNCHECKED_BOX, CHECKED_BOX, XCHECKED_BOX, MIGRATED_BOX, TRANS
 CHECKBOXES = (UNCHECKED_BOX, CHECKED_BOX, XCHECKED_BOX, MIGRATED_BOX, TRANSMIGRATED_BOX)
 
 NUMBER_BULLET = '#.' # Special case for autonumbering
-is_numbered_bullet_re = re.compile('^(\d+|\w|#)\.$')
+is_numbered_bullet_re = re.compile('^(\d+|\w+|#)\.$')
 	#: This regular expression is used to test whether a bullet belongs to a numbered list or not
 
 # Check the (undocumented) list of constants in Gtk.keysyms to see all names
@@ -1800,10 +1800,10 @@ class TextBuffer(Gtk.TextBuffer):
 			if not newbullet:
 				if not is_numbered_bullet_re.match(bullet):
 					return
-				elif bullet.rstrip('.') in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz':
+				elif all(c in POSSIBLE_LETTERS for c in bullet.rstrip('.')):
 					newbullet = '1.' # switch e.g. "a." -> "1."
 				else:
-					newbullet = 'a.' # switch "1." -> "a."
+					newbullet = f'{ALPHABET[0]}.' # switch "1." -> "a."
 
 		if is_numbered_bullet_re.match(newbullet):
 			self._renumber_list(line, indent, newbullet)
@@ -1822,8 +1822,8 @@ class TextBuffer(Gtk.TextBuffer):
 				# so reset count
 				newline, newbullet = self._search_bullet(line, old_indent, +1)
 				if newbullet and is_numbered_bullet_re.match(newbullet):
-					if newbullet.rstrip('.') in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz':
-						self._renumber_list(newline, old_indent, 'a.')
+					if all(c in POSSIBLE_LETTERS for c in bullet.rstrip('.')):
+						self._renumber_list(newline, old_indent, f'{ALPHABET[0]}.')
 					else:
 						self._renumber_list(newline, old_indent, '1.')
 

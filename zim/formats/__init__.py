@@ -73,6 +73,7 @@ the form of rfc822 headers at the top of a page. But "heading" refers
 to a title or subtitle in the document.
 '''
 
+import functools
 import re
 import string
 import itertools
@@ -169,26 +170,47 @@ END = '/'
 
 
 _letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+ALPHABET: str = string.ascii_lowercase
+POSSIBLE_LETTERS: set = set([]).union(ALPHABET, _letters)
+
+@functools.lru_cache()
+def int2str(i: int, alphabet=ALPHABET) -> str:
+	result = []
+	while i > 0:
+		i, r = divmod(i - 1, len(alphabet))
+		result.append(alphabet[r])
+	return ''.join(reversed(result))
+
+
+@functools.lru_cache()
+def str2int(s: str, alphabet=ALPHABET) -> int:
+	result = 0
+	i = 0
+	p = len(s) - 1
+	while i < len(s):
+		result += (alphabet.find(s[i]) + 1) * len(alphabet) ** p
+		i += 1
+		p -= 1
+	return result
+
 
 def increase_list_iter(listiter):
 	'''Get the next item in a list for a numbered list
 	E.g if C{listiter} is C{"1"} this function returns C{"2"}, if it
 	is C{"a"} it returns C{"b"}.
-	@param listiter: the current item, either an integer number or
-	single letter
+	@param listiter: the current item, either an integer number or,
+	the letters corresponding to that number.
 	@returns: the next item, or C{None}
 	'''
-	try:
-		i = int(listiter)
-		return str(i + 1)
-	except ValueError:
-		try:
-			i = _letters.index(listiter)
-			return _letters[i + 1]
-		except ValueError: # listiter is not a letter
-			return None
-		except IndexError: # wrap to start of list
-			return _letters[0]
+	if listiter.isdigit():
+		return str(int(listiter) + 1)
+	elif all(c in POSSIBLE_LETTERS for c in listiter):
+		result = int2str(str2int(listiter.lower()) + 1)
+		if listiter.isupper():
+			return result.upper()
+		return result
+	else:
+		return None
 
 
 def convert_list_iter_letter_to_number(listiter):
@@ -197,16 +219,13 @@ def convert_list_iter_letter_to_number(listiter):
 	Both "A." and "a." convert to "1." assumption is that this function
 	is used for start iter only, not whole list
 	'''
-	try:
-		i = int(listiter)
+	if listiter.isdigit():
 		return listiter
-	except ValueError:
-		try:
-			i = _letters.index(listiter) + 1
-			i = i if i <= 26 else i % 26
-			return str(i)
-		except ValueError: # listiter is not a letter
-			return None
+	elif all(c in POSSIBLE_LETTERS for c in listiter):
+		result = str(str2int(listiter.lower()))
+		return result.upper() if listiter.isupper() else result
+	else:
+		return None
 
 
 def encode_xml(text):

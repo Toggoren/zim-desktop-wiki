@@ -40,7 +40,7 @@ info = {
 }
 
 
-bullet_pattern = '(?:[\\*\u2022]|\\[[ \\*x><]\\]|\\d+\\.|[a-zA-Z]\\.)[\\ \\t]+'
+bullet_pattern = '(?:[\\*\u2022]|\\[[ \\*x><]\\]|\\d+\\.|[a-zA-Z]+\\.)[\\ \\t]+'
 	# bullets can be '*' or 0x2022 for normal items
 	# and '[ ]', '[*]', '[x]', '[>]' or [<]' for checkbox items
 	# and '1.', '10.', or 'a.' for numbered items (but not 'aa.')
@@ -48,7 +48,7 @@ bullet_pattern = '(?:[\\*\u2022]|\\[[ \\*x><]\\]|\\d+\\.|[a-zA-Z]\\.)[\\ \\t]+'
 bullet_line_re = re.compile(r'^(\t*)(%s)(.*$\n?)' % bullet_pattern)
 	# matches list item: prefix, bullet, text
 
-number_bullet_re = re.compile('^(\d+|[a-zA-Z])\.$')
+number_bullet_re = re.compile('^(\d+|[a-zA-Z]+)\.$')
 
 param_re = re.compile('([\w-]+)=("(?:[^"]|"{2})*"|\S*)')
 	# matches parameter list for objects
