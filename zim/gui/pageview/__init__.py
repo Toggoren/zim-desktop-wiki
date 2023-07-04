@@ -54,7 +54,7 @@ from zim.gui.widgets import \
 	Dialog, FileDialog, QuestionDialog, ErrorDialog, \
 	IconButton, MenuButton, BrowserTreeView, InputEntry, \
 	ScrolledWindow, \
-	rotate_pixbuf, populate_popup_add_separator, strip_boolean_result, \
+	populate_popup_add_separator, strip_boolean_result, \
 	widget_set_css, \
 	LEFT_PANE, RIGHT_PANE, BOTTOM_PANE, PANE_POSITIONS
 from zim.gui.actionextension import ActionExtensionBase, os_default_headerbar
@@ -511,7 +511,7 @@ def image_file_load_pixels(file, width_override=-1, height_override=-1):
 			pixbuf = pixbuf.scale_simple(width_override, height_override, GdkPixbuf.InterpType.BILINEAR)
 				# do not use new_from_file_at_size() here due to bug in Gtk for GIF images, see issue #1563
 
-		pixbuf = rotate_pixbuf(pixbuf)
+		pixbuf = GdkPixbuf.Pixbuf.apply_embedded_orientation(pixbuf)
 
 	except:
 		logger.debug('GTK failed to read image, using Pillow fallback: %s', file.path)

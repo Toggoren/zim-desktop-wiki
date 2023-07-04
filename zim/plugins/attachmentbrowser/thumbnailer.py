@@ -60,7 +60,6 @@ logger = logging.getLogger('zim.plugins.attachmentbrowser')
 import zim
 
 from zim.config import XDG_CACHE_HOME
-from zim.gui.widgets import rotate_pixbuf
 
 from zim.fs import adapt_from_oldfs
 from zim.newfs import LocalFile, LocalFolder
@@ -99,7 +98,7 @@ def pixbufThumbnailCreator(file, thumbfile, thumbsize):
 		optionsvalues.append(v)
 	try:
 		pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(file.path, thumbsize, thumbsize)
-		pixbuf = rotate_pixbuf(pixbuf)
+		pixbuf = GdkPixbuf.Pixbuf.apply_embedded_orientation(pixbuf)
 		pixbuf.savev(tmpfile.path, 'png', optionskeys, optionsvalues)
 		_atomic_rename(tmpfile.path, thumbfile.path)
 	except:
