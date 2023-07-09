@@ -8,6 +8,14 @@ import logging
 from gi.repository import GLib
 from gi.repository import GdkPixbuf
 
+try:
+	from PIL import Image
+except ImportError:
+	PILLOW_AVAILABLE = False
+else:
+	PILLOW_AVAILABLE = True
+
+
 logger = logging.getLogger('zim.gui.images')
 
 
@@ -23,13 +31,12 @@ def image_file_get_dimensions(file_path):
 	if width > 0 and height > 0:
 		return (width, height)
 
-	# Fallback to Pillow
-	try:
-		from PIL import Image # load Pillow only if necessary
-		with Image.open(file_path) as img_pil:
-			return (img_pil.width, img_pil.height)
-	except:
+	if not PILLOW_AVAILABLE:
 		raise AssertionError('Could not get size for: %s' % file_path)
+
+	# Fallback to Pillow
+	with Image.open(file_path) as img_pil:
+		return (img_pil.width, img_pil.height)
 
 
 def image_file_load_pixels(file, width_override=-1, height_override=-1):
@@ -63,7 +70,8 @@ def image_file_load_pixels(file, width_override=-1, height_override=-1):
 	except:
 		logger.debug('GTK failed to read image, using Pillow fallback: %s', file.path)
 
-		from PIL import Image # load Pillow only if necessary
+		if not PILLOW_AVAILABLE:
+			raise RuntimeWarning('Cannot use Pillow because is not installed.')
 
 		with Image.open(file.path) as img_pil:
 
