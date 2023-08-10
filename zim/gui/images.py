@@ -39,6 +39,31 @@ def image_file_get_dimensions(file_path):
 		return (img_pil.width, img_pil.height)
 
 
+def _convert_pillow_image_to_pixbuf(image: Image.Image) -> GdkPixbuf.Pixbuf:
+	# check if there is an alpha channel
+	if image.mode == 'RGB':
+		has_alpha = False
+	elif image.mode == 'RGBA':
+		has_alpha = True
+	else:
+		raise ValueError(f'Pixel format {image.mode} can not be converted to Pixbuf for image {image}')
+
+	# convert to GTK pixbuf
+	data_gtk = GLib.Bytes.new_take(image.tobytes())
+
+	return GdkPixbuf.Pixbuf.new_from_bytes(
+		data=data_gtk,
+		colorspace=GdkPixbuf.Colorspace.RGB,
+		has_alpha=has_alpha,
+		# GTK docs: "Currently only RGB images with 8 bits per sample are supported"
+		# https://docs.gtk.org/gdk-pixbuf/ctor.Pixbuf.new_from_bytes.html#description
+		bits_per_sample=8,
+		width=image.width,
+		height=image.height,
+		rowstride=image.width * (4 if has_alpha else 3),
+	)
+
+
 def image_file_load_pixels(file, width_override=-1, height_override=-1):
 	"""
 	Replacement for GdkPixbuf.Pixbuf.new_from_file_at_size(file.path, w, h)
@@ -75,34 +100,11 @@ def image_file_load_pixels(file, width_override=-1, height_override=-1):
 
 		with Image.open(file.path) as img_pil:
 
+			pixbuf = _convert_pillow_image_to_pixbuf(img_pil)
+
 			# resize if a specific size was requested
 			if b_size_override:
-				logger.debug('PIL resizing %s %s', width_override, height_override)
-				img_pil = img_pil.resize((width_override, height_override))
-
-			# check if there is an alpha channel
-			if img_pil.mode == 'RGB':
-				has_alpha = False
-			elif img_pil.mode == 'RGBA':
-				has_alpha = True
-			else:
-				raise ValueError('Pixel format {fmt} can not be converted to Pixbuf for image {p}'.format(
-					fmt = img_pil.mode, p = file.path,
-				))
-
-			# convert to GTK pixbuf
-			data_gtk = GLib.Bytes.new_take(img_pil.tobytes())
-
-			pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
-				data = data_gtk,
-				colorspace = GdkPixbuf.Colorspace.RGB,
-				has_alpha = has_alpha,
-				# GTK docs: "Currently only RGB images with 8 bits per sample are supported"
-				# https://developer.gnome.org/gdk-pixbuf/stable/gdk-pixbuf-Image-Data-in-Memory.html#gdk-pixbuf-new-from-bytes
-				bits_per_sample = 8,
-				width = img_pil.width,
-				height = img_pil.height,
-				rowstride = img_pil.width * (4 if has_alpha else 3),
-			)
+				pixbuf = pixbuf.scale_simple(width_override, height_override, GdkPixbuf.InterpType.BILINEAR)
+					# do not use new_from_file_at_size() here due to bug in Gtk for GIF images, see issue #1563
 
 	return pixbuf
