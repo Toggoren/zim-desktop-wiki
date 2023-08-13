@@ -1395,8 +1395,7 @@ class TextBuffer(Gtk.TextBuffer):
 
 			pixbuf = image_file_load_pixels(file, int(attrib.get('width', -1)), int(attrib.get('height', -1)))
 		except:
-			#~ logger.exception('Could not load image: %s', file)
-			logger.warning('No such image: %s', file)
+			logger.exception(f'Failed load image: {file}')
 			widget = Gtk.HBox() # Need *some* widget here...
 			pixbuf = widget.render_icon(Gtk.STOCK_MISSING_IMAGE, Gtk.IconSize.DIALOG)
 			pixbuf = pixbuf.copy() # need unique instance to set zim_attrib

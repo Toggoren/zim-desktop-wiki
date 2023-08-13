@@ -18,7 +18,7 @@ from zim.gui.clipboard import Clipboard
 class FilterNoSuchImageWarning(tests.LoggingFilter):
 
 	def __init__(self):
-		tests.LoggingFilter.__init__(self, 'zim.gui.pageview', 'No such image:')
+		tests.LoggingFilter.__init__(self, 'zim.gui.pageview', 'Failed load image:')
 
 
 def setUpPageView(notebook, text=''):
