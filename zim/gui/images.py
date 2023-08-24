@@ -18,7 +18,6 @@ except ImportError:
 else:
 	PILLOW_AVAILABLE = True
 
-
 logger = logging.getLogger('zim.gui.images')
 
 
@@ -144,12 +143,12 @@ def image_file_load_pixels(file: LocalFile, requested_width: int = -1, requested
 		msg = f'The orientation tag "{orientation}" was found in the {file} image.'
 	logger.debug(msg)
 
-	need_scale = requested_width > 0 or requested_height > 0
+	width, height = pixbuf.get_width(), pixbuf.get_height()
+	need_swap_width_and_height = orientation in {5, 6, 7, 8}
+	if need_swap_width_and_height:
+		width, height = height, width
+	need_scale = (requested_width > 0 or requested_height > 0) and not (requested_width == width or requested_height == height)
 	if need_scale:
-		width, height = pixbuf.get_width(), pixbuf.get_height()
-		need_swap_width_and_height = orientation in {5, 6, 7, 8}
-		if need_swap_width_and_height:
-			width, height = height, width
 		if requested_height <= 0:
 			requested_height = int(height * requested_width / width)
 		else:
