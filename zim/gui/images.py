@@ -42,7 +42,7 @@ def image_file_get_dimensions(file_path):
 		return (img_pil.width, img_pil.height)
 
 
-def _convert_pillow_image_to_pixbuf(image: Image.Image) -> GdkPixbuf.Pixbuf:
+def _convert_pillow_image_to_pixbuf(image: 'Image.Image') -> GdkPixbuf.Pixbuf:
 	# check if there is an alpha channel
 	if image.mode == 'RGB':
 		has_alpha = False
@@ -67,7 +67,7 @@ def _convert_pillow_image_to_pixbuf(image: Image.Image) -> GdkPixbuf.Pixbuf:
 	)
 
 
-def _extract_orientation_using_pillow(image) -> Optional[int]:
+def _extract_orientation_using_pillow(image: 'Image.Image') -> Optional[int]:
 	pillow_version = tuple(map(int, PILLOW_VERSION_STRING.split('.')))
 	if pillow_version >= (6, 0, 0):
 		# https://pillow.readthedocs.io/en/stable/releasenotes/6.0.0.html#added-exif-class
