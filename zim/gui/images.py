@@ -81,7 +81,7 @@ def _extract_orientation_using_pillow(image: 'Image.Image') -> Optional[int]:
 	return int(orientation) if orientation else None
 
 
-def image_file_load_pixels(file: LocalFile, requested_width: int = -1, requested_height: int = -1) -> GdkPixbuf:
+def image_file_load_pixels(file: LocalFile, requested_width: int = -1, requested_height: int = -1) -> GdkPixbuf.Pixbuf:
 	"""
 	Replacement for GdkPixbuf.Pixbuf.new_from_file_at_size(file.path, w, h)
 	When file does not exist or fails to load, this throws exceptions.
