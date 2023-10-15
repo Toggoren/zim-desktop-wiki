@@ -150,9 +150,9 @@ def image_file_load_pixels(file: LocalFile, requested_width: int = -1, requested
 	need_scale = (requested_width > 0 or requested_height > 0) and not (requested_width == width or requested_height == height)
 	if need_scale:
 		if requested_height <= 0:
-			requested_height = int(height * requested_width / width)
+			requested_height = max(int(height * requested_width / width), 1)
 		else:
-			requested_width = int(width * requested_height / height)
+			requested_width = max(int(width * requested_height / height), 1)
 		if need_swap_width_and_height:
 			requested_width, requested_height = requested_height, requested_width
 
