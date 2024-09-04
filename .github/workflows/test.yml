@@ -1,3 +1,5 @@
+name: Tests
+
 on:
   # Trigger the workflow on push or pull request, but only for the develop branch
   push:
@@ -24,10 +26,11 @@ jobs:
 
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -55,7 +58,8 @@ jobs:
     runs-on: macos-12
     name: Python 3.11 on macos-12
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Configure git
         run: |
@@ -89,7 +93,8 @@ jobs:
 
     name: MSYS2 Python 3.x on windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
